@@ -647,7 +647,7 @@
     <resources>
         <image name="btn" width="300" height="40"/>
         <image name="defaultProfileImage" width="600" height="600"/>
-        <image name="イラスト" width="3182" height="2782"/>
+        <image name="イラスト" width="800" height="800"/>
         <image name="イラスト2" width="2265" height="2341"/>
         <image name="イラスト３" width="1392" height="784"/>
     </resources>
