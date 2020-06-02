@@ -16,7 +16,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
 
     var postArray: [PostData] = []
     //ブロックされたユーザーIDの値を持ってきて格納する配列
-    var blockUserIdArray = [String]()
+    var blockUserIdArray = [ReportBlock]()
 
     // DatabaseのobserveEventの登録状態を表す
     var observing = false
@@ -126,50 +126,50 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
             }
         }
         //ブロック機能
-        getBlockUser()
+        //getBlockUser()
     }
    //MARK: - ブロック機能
     
-    func getBlockUser() {
-        //FIRDatabaseのReference
-        let postsRef = Database.database().reference().child(Const.PostPath)
-
-        //includeKeyでBlockの子クラスである会員情報を持ってきている
-        postsRef.child("posts")
-        postsRef.child("name")
-    
-        //resultかerrorに何か入ってきたら、
-        postsRef.findObjectsInBackground({ (result, error) in
-            //errorがnilでなかったら（エラーがあったら）
-            if error != nil {
-                //エラーの処理
-                print(error)
-            //errorがnilだったら（エラーがなかったら）
-            } else {
-                //ブロックされたユーザーのIDが含まれる + removeall()は初期化していて、データの重複を防いでいる
-                self.blockUserIdArray.removeAll()
-                //resultから一つずつ取り出す（＝blockObject）
-                for blockObject in result as! [NCMBObject] {
-                    //この部分で①の配列（blockUserIdArray）にブロックユーザー情報が格納
-                    //blockUserIdArrayに取り出したオブジェクト(キー値："blockUserID")を追加（append）する
-                    self.blockUserIdArray.append(blockObject.object(forKey: "blockUserID") as! String)
-
-                }
-
-            }
-        })
-        //再読み込み
-        loadData()
-    }
-
-    //③
-    func loadData(){
-        //ここにNCMBから値を持ってくるコードが書いてある前提
-        //appendする時に、ブロックユーザーがnilであったらappendされるようにしている。
-        if self.blockUserIdArray.firstIndex(of: 〇〇.user.objectId) == nil{
-            self.〇〇.append(〇〇)
-        }
-    }
+//    func getBlockUser() {
+//        //FIRDatabaseのReference
+//        let postsRef = Database.database().reference().child(Const.PostPath)
+//
+//        //includeKeyでBlockの子クラスである会員情報を持ってきている
+//        postsRef.child("posts")
+//        postsRef.child("name")
+//
+//        //resultかerrorに何か入ってきたら、
+//        postsRef.findObjectsInBackground({ (result, error) in
+//            //errorがnilでなかったら（エラーがあったら）
+//            if error != nil {
+//                //エラーの処理
+//                print(error)
+//            //errorがnilだったら（エラーがなかったら）
+//            } else {
+//                //ブロックされたユーザーのIDが含まれる + removeall()は初期化していて、データの重複を防いでいる
+//                self.blockUserIdArray.removeAll()
+//                //resultから一つずつ取り出す（＝blockObject）
+//                for blockObject in result as! [NCMBObject] {
+//                    //この部分で①の配列（blockUserIdArray）にブロックユーザー情報が格納
+//                    //blockUserIdArrayに取り出したオブジェクト(キー値："blockUserID")を追加（append）する
+//                    self.blockUserIdArray.append(blockObject.object(forKey: "blockUserID") as! String)
+//
+//                }
+//
+//            }
+//        })
+//        //再読み込み
+//        loadData()
+//    }
+//
+//    //③
+//    func loadData(){
+//        //ここにNCMBから値を持ってくるコードが書いてある前提
+//        //appendする時に、ブロックユーザーがnilであったらappendされるようにしている。
+//        if self.blockUserIdArray.firstIndex(of: 〇〇.user.objectId) == nil{
+//            self.〇〇.append(〇〇)
+//        }
+//    }
     
     
 //MARK: - テーブルビュー
@@ -203,24 +203,27 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 //報告アクション
                 let reportAction = UIAlertAction(title: "報告する", style: .destructive ){ (action) in
                     SVProgressHUD.showSuccess(withStatus: "この投稿を報告しました。ご協力ありがとうございました。")
-                    //新たにクラス作る
-                    let object = NSObject(className: "Report")
-                    //報告IDとユーザー情報を保存
-                    //オブジェクトに値を設定（報告ID）
-                    object?.setObject(self.〇〇[indexPath.row].objectID, forKey: "reportId")
-                    //オブジェクトに値を設定（ユーザー情報）
-                    object?.setObject(NCMBUser.current(), forKey: "user")
-                    //データストアへの保存を実施
-                    object?.saveInBackground({ (error) in
-                        //エラーがnilじゃなかったら、（エラーだったら）
-                        if error != nil {
-                            SVProgressHUD.showError(withStatus: "エラーです")
-                        //エラーじゃなかったら、
-                        } else {
-                            SVProgressHUD.dismiss(withDelay: 2)
-                            tableView.deselectRow(at: indexPath, animated: true)
-                        }
-                    })
+                    //参照
+                     let postRef = Database.database().reference().child(Const2.PostPath)
+                    let blockUserIdArray = ["reportID","user"]
+                    postRef.childByAutoId().setValue(blockUserIdArray)
+
+//                    //報告IDとユーザー情報を保存
+//                    //オブジェクトに値を設定（報告ID）
+//                    postRef.child("reportId")
+//                    //オブジェクトに値を設定（ユーザー情報）
+//                    postRef.child("user")
+//                    //データストアへの保存を実施
+//                    postRef.child("block")({ (error) in
+//                        //エラーがnilじゃなかったら、（エラーだったら）
+//                        if error != nil {
+//                            SVProgressHUD.showError(withStatus: "エラーです")
+//                        //エラーじゃなかったら、
+//                        } else {
+//                            SVProgressHUD.dismiss(withDelay: 2)
+//                            tableView.deselectRow(at: indexPath, animated: true)
+//                        }
+//                    })
                 }
                 //アラートアクションのキャンセルボタン
                 let cancelAction = UIAlertAction(title: "キャンセル", style: .cancel) { (action) in
@@ -244,21 +247,18 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
                 let blockAction = UIAlertAction(title: "ブロックする", style: .destructive) { (action) in
                     SVProgressHUD.showSuccess(withStatus: "このユーザーをブロックしました。")
-                    //新たにクラス作る
-                    let object = NCMBObject(className: "Block")
-                    object?.setPostData(self.postArray[indexPath.row].user.objectId, forKey: "blockUserID")
-                    object?.setObject(NCMBUser.current(), forKey: "user")
-                    object?.saveInBackground({ (error) in
-                        if error != nil {
-                            SVProgressHUD.showError(withStatus: "エラーです")
-                        } else {
-                            SVProgressHUD.dismiss(withDelay: 2)
-                            tableView.deselectRow(at: indexPath, animated: true)
+                    //参照
+                     let postRef = Database.database().reference().child(Const2.PostPath)
+                    let blockUserIdArray = ["reportID","user"]
+                    postRef.childByAutoId().setValue(blockUserIdArray)
+
+                    //報告IDとユーザー情報を保存
+                    //オブジェクトに値を設定（報告ID）
+                    postRef.child("reportId")
+                    //オブジェクトに値を設定（ユーザー情報）
+                    postRef.child("user")
 
                      //ここで③を読み込んでいる
-       　　　　　　　　　self.getBlockUser()
-                        }
-                    })
 
                 }
                 //アラートアクションのキャンセルボタン
@@ -279,36 +279,40 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
             
         //投稿ユーザーが自分だったら、
         } else {
+            //スワイプアクション削除ボタン
             let deleteButton: UIContextualAction = UIContextualAction(style: .normal, title: "削除",handler:  { (action: UIContextualAction, view: UIView, success :(Bool) -> Void )in
-                let query = NCMBQuery(className: "取り出したいクラスの名前")
-                query?.getObjectInBackground(withId: self.〇〇[indexPath.row].objectID, block: { (post, error) in
-                    if error != nil {
-                        SVProgressHUD.showError(withStatus: "エラーです")
-                        SVProgressHUD.dismiss(withDelay: 2)
-                    } else {
-                        DispatchQueue.main.async {
-                            let alertController = UIAlertController(title: "投稿を削除しますか？", message: "削除します", preferredStyle: .alert)
-                            let cancelAction = UIAlertAction(title: "キャンセル", style: .cancel) { (action) in
-                                alertController.dismiss(animated: true, completion: nil)
-                            }
-                            let deleteAction = UIAlertAction(title: "OK", style: .default) { (acrion) in
-                                post?.deleteInBackground({ (error) in
-                                    if error != nil {
-                                        SVProgressHUD.showError(withStatus: "エラーです")
-                                        SVProgressHUD.dismiss(withDelay: 2)
-                                    } else {
-                                        tableView.deselectRow(at: indexPath, animated: true)
-                                        self.loadData()
-                                        self.〇〇TableView.reloadData()
+                let postsRef = Database.database().reference().child(Const2.PostPath)
+                    //FIRDatabaseのchildChangedイベント（子の変更）
+                    postsRef.observe(.childChanged, with: { snapshot in
+                        print("DEBUG_PRINT: 要素が変更されました。")
+                    if let uid = Auth.auth().currentUser?.uid{
+                    let reportBlock = ReportBlock(snapshot: snapshot, myId: uid)
+                        
+                        postsRef.setValue(self.blockUserIdArray[indexPath.row].reportId, withCompletionBlock: { (post, error) in
+                            //もし、エラーがnilじゃなかったら（エラーだったら）
+                            if error != nil {
+                                SVProgressHUD.showError(withStatus: "エラーです")
+                                SVProgressHUD.dismiss(withDelay: 2)
+                            //エラーじゃなかったら
+                            } else {
+                            //非同期的：タスクをディスパッチキューに追加したら、そのタスクの処理完了を待たずに次の行に移行する。
+                                DispatchQueue.main.async {
+                                    let alertController = UIAlertController(title: "投稿を削除しますか？", message: "削除します", preferredStyle: .alert)
+                                    let cancelAction = UIAlertAction(title: "キャンセル", style: .cancel) { (action) in
+                                        alertController.dismiss(animated: true, completion: nil)
                                     }
-                                })
-                            }
-                            alertController.addAction(cancelAction)
-                            alertController.addAction(deleteAction)
-                            self.present(alertController,animated: true,completion: nil)
-                            tableView.isEditing = false
-                        }
+                                    let deleteAction = UIAlertAction(title: "OK", style: .default) { (acrion) in
+                                        //オブジェクトの削除
+                                        postsRef.child(blockUserIdArray[indexPath.row]).removeValue()
+                                    }
+                                    alertController.addAction(cancelAction)
+                                    alertController.addAction(deleteAction)
+                                    self.present(alertController,animated: true,completion: nil)
+                                    tableView.isEditing = false
+                                }
 
+                            }
+                        })
                     }
                 })
             })
