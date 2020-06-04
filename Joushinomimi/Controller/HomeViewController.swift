@@ -16,7 +16,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
 
     var postArray: [PostData] = []
     //ブロックされたユーザーIDの値を持ってきて格納する配列
-    var blockUserIdArray = [ReportBlock]()
+    var blockUserIdDic = [ReportBlock]()
 
     // DatabaseのobserveEventの登録状態を表す
     var observing = false
@@ -193,8 +193,10 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         return 300
     }
     //自分以外＝>報告・ブロックする
-    private func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UIContextualAction]? {
-        //もし、投稿ユーザーが自分でなかったら、
+    internal func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        
+        
+        //もし、投稿ユーザーが自分じゃなかったら、
         if Auth.auth().userAccessGroup != Auth.auth().currentUser?.uid {
             //スワイプアクション報告ボタン
             let reportButton: UIContextualAction = UIContextualAction(style: .normal, title: "報告",handler:  { (action: UIContextualAction, view: UIView, success :(Bool) -> Void )in
@@ -204,26 +206,15 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 let reportAction = UIAlertAction(title: "報告する", style: .destructive ){ (action) in
                     SVProgressHUD.showSuccess(withStatus: "この投稿を報告しました。ご協力ありがとうございました。")
                     //参照
-                     let postRef = Database.database().reference().child(Const2.PostPath)
-                    let blockUserIdArray = ["reportID","user"]
-                    postRef.childByAutoId().setValue(blockUserIdArray)
+                    let reportBlock = self.blockUserIdDic[indexPath.row]
+                    let postRef = Database.database().reference()
+                    let const2 = postRef.child(Const2.PostPath)
+                    let postDataId = const2.child(reportBlock.id!)
+                    let reportUserId = reportBlock.reportId
+                    let blockUserIdDic = ["reportID": postDataId,"reportUser": reportUserId as Any] as [String : Any]
+                    //保存
+                    postRef.childByAutoId().setValue(blockUserIdDic)
 
-//                    //報告IDとユーザー情報を保存
-//                    //オブジェクトに値を設定（報告ID）
-//                    postRef.child("reportId")
-//                    //オブジェクトに値を設定（ユーザー情報）
-//                    postRef.child("user")
-//                    //データストアへの保存を実施
-//                    postRef.child("block")({ (error) in
-//                        //エラーがnilじゃなかったら、（エラーだったら）
-//                        if error != nil {
-//                            SVProgressHUD.showError(withStatus: "エラーです")
-//                        //エラーじゃなかったら、
-//                        } else {
-//                            SVProgressHUD.dismiss(withDelay: 2)
-//                            tableView.deselectRow(at: indexPath, animated: true)
-//                        }
-//                    })
                 }
                 //アラートアクションのキャンセルボタン
                 let cancelAction = UIAlertAction(title: "キャンセル", style: .cancel) { (action) in
@@ -248,15 +239,15 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 let blockAction = UIAlertAction(title: "ブロックする", style: .destructive) { (action) in
                     SVProgressHUD.showSuccess(withStatus: "このユーザーをブロックしました。")
                     //参照
-                     let postRef = Database.database().reference().child(Const2.PostPath)
-                    let blockUserIdArray = ["reportID","user"]
-                    postRef.childByAutoId().setValue(blockUserIdArray)
+                    let reportBlock = self.blockUserIdDic[indexPath.row]
+                    let postRef = Database.database().reference()
+                    let const2 = postRef.child(Const2.PostPath)
+                    let postDataId = const2.child(reportBlock.id!)
+                    let blockUserId = reportBlock.blockId
+                    let blockUserIdDic = ["blockID": postDataId,"blockId": blockUserId as Any] as [String : Any]
+                    //保存
+                    postRef.childByAutoId().setValue(blockUserIdDic)
 
-                    //報告IDとユーザー情報を保存
-                    //オブジェクトに値を設定（報告ID）
-                    postRef.child("reportId")
-                    //オブジェクトに値を設定（ユーザー情報）
-                    postRef.child("user")
 
                      //ここで③を読み込んでいる
 
@@ -270,47 +261,52 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 alertController.addAction(cancelAction)
                 //アラートを表示
                 self.present(alertController, animated: true, completion: nil)
+                //テーブルビューの編集→切
                 tableView.isEditing = false
             })
             //ブロックボタンの色(青)
             blockButton.backgroundColor = UIColor.blue
             
-            return[blockButton,reportButton]
+            return UISwipeActionsConfiguration(actions: [blockButton,reportButton])
             
         //投稿ユーザーが自分だったら、
         } else {
             //スワイプアクション削除ボタン
             let deleteButton: UIContextualAction = UIContextualAction(style: .normal, title: "削除",handler:  { (action: UIContextualAction, view: UIView, success :(Bool) -> Void )in
-                let postsRef = Database.database().reference().child(Const2.PostPath)
-                    //FIRDatabaseのchildChangedイベント（子の変更）
-                    postsRef.observe(.childChanged, with: { snapshot in
-                        print("DEBUG_PRINT: 要素が変更されました。")
+                //参照
+                let postRef = Database.database().reference()
+                let const1 = postRef.child(Const.PostPath)
+                let const2 = postRef.child(Const2.PostPath)
+                //FIRDatabaseのchildChangedイベント（子の変更）
+                const1.observe(.childChanged, with: { snapshot in
+                    print("DEBUG_PRINT: 要素が変更されました。")
+                    //uid=自分だったら、
                     if let uid = Auth.auth().currentUser?.uid{
-                    let reportBlock = ReportBlock(snapshot: snapshot, myId: uid)
                         
-                        postsRef.setValue(self.blockUserIdArray[indexPath.row].reportId, withCompletionBlock: { (post, error) in
-                            //もし、エラーがnilじゃなかったら（エラーだったら）
-                            if error != nil {
-                                SVProgressHUD.showError(withStatus: "エラーです")
-                                SVProgressHUD.dismiss(withDelay: 2)
-                            //エラーじゃなかったら
-                            } else {
-                            //非同期的：タスクをディスパッチキューに追加したら、そのタスクの処理完了を待たずに次の行に移行する。
-                                DispatchQueue.main.async {
-                                    let alertController = UIAlertController(title: "投稿を削除しますか？", message: "削除します", preferredStyle: .alert)
-                                    let cancelAction = UIAlertAction(title: "キャンセル", style: .cancel) { (action) in
-                                        alertController.dismiss(animated: true, completion: nil)
-                                    }
-                                    let deleteAction = UIAlertAction(title: "OK", style: .default) { (acrion) in
-                                        //オブジェクトの削除
-                                        postsRef.child(blockUserIdArray[indexPath.row]).removeValue()
-                                    }
-                                    alertController.addAction(cancelAction)
-                                    alertController.addAction(deleteAction)
-                                    self.present(alertController,animated: true,completion: nil)
-                                    tableView.isEditing = false
-                                }
+                        let reportBlock = ReportBlock(snapshot: snapshot, myId: uid)
 
+                        const2.setValue(self.blockUserIdDic[indexPath.row].reportId, withCompletionBlock: { (post, error) in
+                         
+                            //非同期的：タスクをディスパッチキューに追加したら、そのタスクの処理完了を待たずに次の行に移行する。
+                            DispatchQueue.main.async {
+                                let alertController = UIAlertController(title: "投稿を削除しますか？", message: "削除します", preferredStyle: .alert)
+                                //削除のキャンセル
+                                let cancelAction = UIAlertAction(title: "キャンセル", style: .cancel) { (action) in
+                                    alertController.dismiss(animated: true, completion: nil)
+                                }
+                                //削除をする
+                                let deleteAction = UIAlertAction(title: "OK", style: .default) { (action) in
+                                    //オブジェクトの削除
+                                    const1.child("posts").removeValue()
+                                }
+                                //UIAlertControllerにキャンセルアクションを追加
+                                alertController.addAction(cancelAction)
+                                //UIAlertControllerに削除アクションを追加
+                                alertController.addAction(deleteAction)
+                                //アラートを表示
+                                self.present(alertController,animated: true,completion: nil)
+                                //テーブルビューの編集→切
+                                tableView.isEditing = false
                             }
                         })
                     }
@@ -318,7 +314,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
             })
             //削除ボタンの色(赤)
             deleteButton.backgroundColor = UIColor.red //色変更
-            return [deleteButton]
+            return UISwipeActionsConfiguration(actions:[deleteButton])
         }
     }
 //MARK: - ハートボタン
@@ -335,19 +331,23 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         let postData = postArray[indexPath!.row]
 
         // Firebaseに保存するデータの準備
+        //uidとは現在のログイン者である
         if let uid = Auth.auth().currentUser?.uid {
             if postData.isLiked {
                 // すでにいいねをしていた場合はいいねを解除するためIDを取り除く
                 var index = -1
                 for likeId in postData.likes {
+                    //likeId = 自分だったら、
                     if likeId == uid {
                         // 削除するためにインデックスを保持しておく
                         index = postData.likes.firstIndex(of: likeId)!
                         break
                     }
                 }
+                //削除する
                 postData.likes.remove(at: index)
             } else {
+                //追加する
                 postData.likes.append(uid)
             }
 

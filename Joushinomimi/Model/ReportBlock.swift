@@ -11,6 +11,7 @@ import Firebase
 class ReportBlock: NSObject {
     var id: String?
     var reportId: String?
+    var blockId: String?
     var user: String?
 
 
@@ -21,6 +22,7 @@ class ReportBlock: NSObject {
         let valueDictionary = snapshot.value as! [String: Any]
         
         self.reportId = valueDictionary["reportId"] as? String
+        self.blockId = valueDictionary["blockId"] as? String
         self.user = valueDictionary["user"] as? String
 
        
