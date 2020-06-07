@@ -69,14 +69,15 @@ class PostViewController: UIViewController {
         }
 
         // postDataに必要な情報を取得しておく
+        let uid = Auth.auth().currentUser?.uid
+        let postRef = Database.database().reference().child(Const.PostPath)
         let time = Date.timeIntervalSinceReferenceDate
         let name = Auth.auth().currentUser?.displayName
+        let autoIdKey = postRef.childByAutoId().key
 
         // 辞書を作成してFirebaseに保存する
-        let postRef = Database.database().reference().child(Const.PostPath)
-        
-        let postDic = ["name": name!,"caption": textField.text!, "time": String(time), "postComment": commentView.text!,"profileImage": profileImageString] 
-        postRef.childByAutoId().setValue(postDic)
+        let postDic = ["autoIdKey":autoIdKey!, "uid":uid!, "name": name!,"caption": textField.text!, "time": String(time), "postComment": commentView.text!,"profileImage": profileImageString] as [String : Any]
+        postRef.child(autoIdKey!).setValue(postDic)
 
         // 全てのモーダルを閉じる
         UIApplication.shared.keyWindow?.rootViewController?.dismiss(animated: true, completion: nil)
@@ -87,6 +88,6 @@ class PostViewController: UIViewController {
         // 画面を閉じる
         dismiss(animated: true, completion: nil)
     }
-
+ 
     
 }
