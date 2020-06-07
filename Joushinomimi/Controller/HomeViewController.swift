@@ -47,13 +47,10 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         tableView.refreshControl = refresh
         refresh.addTarget(self, action: #selector(update), for: .valueChanged)
         
-        reloadData()
-        
         tableView.reloadData()
 
     }
     @objc func update(){
-        reloadData()
         tableView.reloadData()
         // クルクルを止める
         refresh.endRefreshing()
@@ -300,7 +297,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                                     //削除をする
                                     let deleteAction = UIAlertAction(title: "OK", style: .default) { (action) in
                                         //オブジェクトの削除
-                                        const1.removeValue()
+                                        const1.child(postData.id!).removeValue()
                                         print("削除しました")
                                         
                                     }
@@ -310,18 +307,19 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                                     alertController.addAction(deleteAction)
                                     //アラートを表示
                                     self.present(alertController,animated: true,completion: nil)
-//                                    //テーブルビューの編集→切
-//                                    tableView.isEditing = false
-                                    self.reloadData()
+                                    //テーブルビューの編集→切
+                                    tableView.isEditing = false
                                 }
-
-
             })
             //削除ボタンの色(赤)
             deleteButton.backgroundColor = UIColor.red //色変更
+            
             return UISwipeActionsConfiguration(actions:[deleteButton])
+            
         }
+
     }
+    
 //MARK: - ハートボタン
     // セル内のボタンがタップされた時に呼ばれるメソッド
     @objc func handleButton(_ sender: UIButton, forEvent event: UIEvent) {
@@ -363,75 +361,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
 
         }
     }
-   func reloadData() {
-    
-        var ref: DatabaseReference!
-        ref = Database.database().reference()
-    
-       //現在のユーザーがnillでなかったら、
-           if Auth.auth().currentUser != nil {
-               //self.observing == falseの時、
-               if self.observing == false {
-               // 💡要素が追加されたらpostArrayに追加してTableViewを再表示する
-                   //FIRDatabaseのReference
-                let postsRef = ref.child("posts")
-                   //FIRDatabaseのchildAddedイベント（子の追加）
-                   postsRef.observe(.childAdded, with: { snapshot in
-                       print("DEBUG_PRINT: 要素が追加されました。")
-
-                   //💡 PostDataクラスを生成して受け取ったデータを設定する
-                       //Auth.auth().currentUser?.uidがnilでなかったら、
-                       if let uid = Auth.auth().currentUser?.uid {
-                           //PostDataをpostDataとする
-                           let postData = PostData(snapshot: snapshot, myId: uid)
-                           
-                           //0番のインデックスに新しいデータを挿入する
-                           self.postArray.insert(postData, at: 0)
-
-                           // TableViewを再表示する
-                           self.tableView.reloadData()
-                       }
-                   })
-               // 💡要素が変更されたら該当のデータをpostArrayから一度削除した後に新しいデータを追加してTableViewを再表示する
-                   //FIRDatabaseのchildChangedイベント（子の変更）
-                   postsRef.observe(.childChanged, with: { snapshot in
-                       print("DEBUG_PRINT: 要素が変更されました。")
-                       
-                       //Auth.auth().currentUser?.uidがnilでなかったら、
-                       if let uid = Auth.auth().currentUser?.uid {
-                       // 💡PostDataクラスを生成して受け取ったデータを設定する
-                           let postData = PostData(snapshot: snapshot, myId: uid)
-
-                       // 💡保持している配列からidが同じものを探す
-                           //初期値は0
-                           var index: Int = 0
-                           //postArrayから一つずつ取り出す
-                           for post in self.postArray {
-                               //取り出したID(post.id)とポストデータのID（postData.id）が同じとき、
-                               if post.id == postData.id {
-                                   //（一致したIDのうちの）最初のインデックスをindexとする
-                                   index = self.postArray.firstIndex(of: post)!
-                                   break
-                               }
-                           }
-
-                           // 差し替えるため一度削除する
-                           self.postArray.remove(at: index)
-
-                           // 削除したところに更新済みのデータを追加する
-                           self.postArray.insert(postData, at: index)
-
-                           // TableViewを再表示する
-                           self.tableView.reloadData()
-                       }
-                   })
-
-                   // DatabaseのobserveEventが上記コードにより登録されたためtrueとする
-                   observing = true
-               }
-        
-           }
-   }
+   
 }
 
 
