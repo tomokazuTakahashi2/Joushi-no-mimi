@@ -140,6 +140,8 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         }
         //ブロック機能
         //getBlockUser()
+        print("postArrayの中身", postArray)
+        print("blockUserIdDicyの中身", blockUserIdDic)
     }
    //MARK: - ブロック機能
     
@@ -299,6 +301,20 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                                         //オブジェクトの削除
                                         const1.child(postData.id!).removeValue()
                                         print("削除しました")
+                                        // 差し替えるため一度削除する
+                                       var index: Int = 0
+                                       //postArrayから一つずつ取り出す
+                                       for post in self.postArray {
+                                           //取り出したID(post.id)とポストデータのID（postData.id）が同じとき、
+                                           if post.id == postData.id {
+                                               //（一致したIDのうちの）最初のインデックスをindexとする
+                                               index = self.postArray.firstIndex(of: post)!
+                                               break
+                                           }
+                                       }
+                                        self.postArray.remove(at: index)
+                                        // TableViewを再表示する
+                                        self.tableView.reloadData()
                                         
                                     }
                                     //UIAlertControllerにキャンセルアクションを追加
@@ -307,9 +323,11 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                                     alertController.addAction(deleteAction)
                                     //アラートを表示
                                     self.present(alertController,animated: true,completion: nil)
+                        
                                     //テーブルビューの編集→切
                                     tableView.isEditing = false
                                 }
+    
             })
             //削除ボタンの色(赤)
             deleteButton.backgroundColor = UIColor.red //色変更
@@ -317,6 +335,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
             return UISwipeActionsConfiguration(actions:[deleteButton])
             
         }
+       
 
     }
     
@@ -349,6 +368,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 }
                 //削除する
                 postData.likes.remove(at: index)
+            //いいねがされていなかったら、
             } else {
                 //追加する
                 postData.likes.append(uid)

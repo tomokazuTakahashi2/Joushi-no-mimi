@@ -77,7 +77,7 @@ class PostViewController: UIViewController {
 
         // 辞書を作成してFirebaseに保存する
         let postDic = ["autoIdKey":autoIdKey!, "uid":uid!, "name": name!,"caption": textField.text!, "time": String(time), "postComment": commentView.text!,"profileImage": profileImageString] as [String : Any]
-        postRef.child(autoIdKey!).setValue(postDic)
+        postRef.childByAutoId().setValue(postDic)
 
         // 全てのモーダルを閉じる
         UIApplication.shared.keyWindow?.rootViewController?.dismiss(animated: true, completion: nil)

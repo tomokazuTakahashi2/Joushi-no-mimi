@@ -17,7 +17,7 @@ struct Test: Codable {
 struct NewsModel: Codable  {
     
     //日付
-    var publishedAt: String? = ""
+    var publishedAt: String? = nil
     var dateString: String{
      //NSDateFormatterのインスタンスを生成
      let formatter: DateFormatter = DateFormatter()
@@ -37,35 +37,35 @@ struct NewsModel: Codable  {
         return publishedAt!
     }
     //著者名
-    var author: String? = ""
+    var author: String? = nil
     //記事名
-    var title: String? = ""
+    var title: String? = nil
     
     //イメージ
     var urlToImage: String? = nil
     
     
     //記事本文
-    var description: String? = ""
+    var description: String? = nil
     //出典
 //    var name: String? = ""
     //URL
-    var url: String? = ""
+    var url: String? = nil
     
 }
 
 extension UIImage {
    public convenience init(url: String) {
        let url = URL(string: url)
-       do {
-           let data = try Data(contentsOf: url!)
-        if data != nil {
-        self.init(data: data)!
-           return
-        }
-       } catch let err {
-           print("Error : \(err.localizedDescription)")
-       }
-       self.init()
+           do {
+               let data = try Data(contentsOf: url!)
+            if data != nil {
+                self.init(data: data)!
+               return
+            }
+           } catch let err {
+               print("Error : \(err.localizedDescription)")
+           }
+           self.init()
    }
 }
