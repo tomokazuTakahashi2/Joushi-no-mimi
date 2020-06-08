@@ -312,6 +312,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                                                break
                                            }
                                        }
+                                        //postArrayを削除
                                         self.postArray.remove(at: index)
                                         // TableViewを再表示する
                                         self.tableView.reloadData()
