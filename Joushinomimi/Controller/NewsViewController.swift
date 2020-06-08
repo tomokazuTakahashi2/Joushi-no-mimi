@@ -8,7 +8,6 @@
 
 import UIKit
 import SDWebImage
-//import SwiftyJSON
 import SafariServices
 
 class NewsViewController: UIViewController, UISearchBarDelegate, UITableViewDataSource, UITableViewDelegate {

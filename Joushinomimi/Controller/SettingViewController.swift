@@ -9,6 +9,7 @@
 import UIKit
 import ESTabBarController
 import Firebase
+import FirebaseStorage
 import SVProgressHUD
 import CLImageEditor
 import Kingfisher

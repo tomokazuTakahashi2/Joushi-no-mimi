@@ -15,7 +15,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     @IBOutlet weak var tableView: UITableView!
 
     var postArray: [PostData] = []
-    //ブロックされたユーザーIDの値を持ってきて格納する配列
+    //ブロックされたユーザーIDの値を持ってきて格納する辞書
     var blockUserIdDic = [ReportBlock]()
     //引っ張って更新
     let refresh = UIRefreshControl()
@@ -140,8 +140,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         }
         //ブロック機能
         //getBlockUser()
-        print("postArrayの中身", postArray)
-        print("blockUserIdDicyの中身", blockUserIdDic)
+
     }
    //MARK: - ブロック機能
     
@@ -213,34 +212,38 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         let postData = postArray[indexPath.row]
         let postRef = Database.database().reference()
         let const1 = postRef.child(Const.PostPath)
-        let const2 = postRef.child(Const2.PostPath)
+        let const2 = postRef.child(Const2.PostPath2)
         
         //もし、投稿ユーザーIDが自分のIDじゃなかったら、
         if postData.uid != Auth.auth().currentUser?.uid{
 
-            //スワイプアクション報告ボタン
+            //💡スワイプアクション報告ボタン
             let reportButton: UIContextualAction = UIContextualAction(style: .normal, title: "報告",handler:  { (action: UIContextualAction, view: UIView, success :(Bool) -> Void )in
-                let reportBlock = self.blockUserIdDic[indexPath.row]
-                print(reportBlock)
-                let postDataId = const2.child(reportBlock.id!)                //アラートコントローラー
+                
+                //アラートコントローラー（報告）
                 let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
                 //報告アクション
                 let reportAction = UIAlertAction(title: "報告する", style: .destructive ){ (action) in
                     //表示
                     SVProgressHUD.showSuccess(withStatus: "この投稿を報告しました。ご協力ありがとうございました。")
-                    //参照
-                    let reportUserId = reportBlock.reportId
-                    let blockUserIdDic = ["reportID": postDataId,"reportUser": reportUserId as Any] as [String : Any]
+                    
+                    let postDataId = postData.id
+                    let reportUserId = postData.uid
+                    //辞書
+                    let blockUserIdDic = ["reportID": postDataId!,"reportUser": reportUserId!] as [String : Any]
                     //保存
-                    postRef.childByAutoId().setValue(blockUserIdDic)
+                    const2.child("report").childByAutoId().setValue(blockUserIdDic)
+                    print("DEBUG_PRINT: 報告を保存しました。")
+                    print(blockUserIdDic)
 
                 }
-                //アラートアクションのキャンセルボタン
+                //アラートアクション（報告）のキャンセルボタン
                 let cancelAction = UIAlertAction(title: "キャンセル", style: .cancel) { (action) in
                     alertController.dismiss(animated: true, completion: nil)
                 }
-                //UIAlertControllerにActionを追加(報告とキャンセル)
+                //UIAlertControllerに報告Actionを追加
                 alertController.addAction(reportAction)
+                //UIAlertControllerにキャンセルActionを追加
                 alertController.addAction(cancelAction)
                 //アラートを表示
                 self.present(alertController, animated: true, completion: nil)
@@ -250,18 +253,20 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
             //報告ボタンの色(赤)
             reportButton.backgroundColor = UIColor.red
             
-            //スワイプアクションブロックボタン
+            //💡スワイプアクションブロックボタン
             let blockButton: UIContextualAction = UIContextualAction(style: .normal, title: "ブロック",handler:  { (action: UIContextualAction, view: UIView, success :(Bool) -> Void )in
-                //self.comments.remove(at: indexPath.row)
-                //tableView.deleteRows(at: [indexPath], with: .fade)
+            
+                //アラートアクション（ブロック）
                 let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
                 let blockAction = UIAlertAction(title: "ブロックする", style: .destructive) { (action) in
                     SVProgressHUD.showSuccess(withStatus: "このユーザーをブロックしました。")
-//                    //参照
-//                    let blockUserId = reportBlock.blockId
-//                    let blockUserIdDic = ["blockID": postDataId,"blockId": blockUserId as Any] as [String : Any]
-//                    //保存
-//                    postRef.childByAutoId().setValue(blockUserIdDic)
+                    
+                    let blockId = postData.id
+                    let blockUserId = postData.uid
+                    //辞書
+                    let blockUserIdDic = ["blockId": blockId!,"blockUserId": blockUserId!] as [String : Any]
+                    //保存
+                    const2.child("block").childByAutoId().setValue(blockUserIdDic)
 
 
                      //ここで③を読み込んでいる
@@ -271,8 +276,9 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 let cancelAction = UIAlertAction(title: "キャンセル", style: .cancel) { (action) in
                     alertController.dismiss(animated: true, completion: nil)
                 }
-                //UIAlertControllerにActionを追加(ブロックとキャンセル)
+                //UIAlertControllerにブロックActionを追加
                 alertController.addAction(blockAction)
+                //UIAlertControllerにキャンセルActionを追加
                 alertController.addAction(cancelAction)
                 //アラートを表示
                 self.present(alertController, animated: true, completion: nil)
@@ -286,7 +292,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
             
         //投稿ユーザーが自分だったら、
         } else {
-            //スワイプアクション削除ボタン
+            //💡スワイプアクション削除ボタン
             let deleteButton = UIContextualAction(style: .normal, title: "削除",handler:  { (action: UIContextualAction, view: UIView, success :(Bool) -> Void )in
    
                                 //非同期的：タスクをディスパッチキューに追加したら、そのタスクの処理完了を待たずに次の行に移行する。

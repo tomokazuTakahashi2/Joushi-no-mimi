@@ -1,5 +1,5 @@
 # Uncomment the next line to define a global platform for your project
-platform :ios, '12.2'
+# platform :ios, '12.2'
 
 target 'Joushinomimi' do
   # Comment the next line if you don't want to use dynamic frameworks
@@ -15,9 +15,6 @@ target 'Joushinomimi' do
   pod 'CLImageEditor/AllTools','0.2.3'
   pod 'FirebaseUI/Storage'
   pod 'Kingfisher'
-  pod 'Alamofire'
-  pod 'SwiftyJSON'
   pod 'SDWebImage'
-  
 
 end
