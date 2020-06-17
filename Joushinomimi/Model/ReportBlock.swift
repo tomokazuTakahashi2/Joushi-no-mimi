@@ -13,6 +13,7 @@ class ReportBlock: NSObject {
     var reportId: String?
     var reportUser: String?
     var blockId: String?
+    var blockUserId: String?
 
 
     init(snapshot: DataSnapshot, myId: String) {
@@ -26,6 +27,8 @@ class ReportBlock: NSObject {
         self.reportUser = valueDictionary["reportUser"] as? String
         
         self.blockId = valueDictionary["blockId"] as? String
+        
+        self.blockUserId = valueDictionary["blockUserId"] as? String
        
     }
 }

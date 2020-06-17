@@ -15,8 +15,11 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     @IBOutlet weak var tableView: UITableView!
 
     var postArray: [PostData] = []
-    //ブロックされたユーザーIDの値を持ってきて格納する辞書
-    var blockUserIdDic = [ReportBlock]()
+    //ブロックされたユーザーID
+    var blockUserIdArray =  [String]()
+    //ブロックされていないユーザー
+    var filteringArray =  [String]()
+    
     //引っ張って更新
     let refresh = UIRefreshControl()
 
@@ -25,6 +28,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
 //MARK: - viewDidLoad
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         
         //テーブルビューの２セット
         tableView.delegate = self
@@ -144,39 +148,23 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
    //MARK: - ブロック機能
     
-//    func getBlockUser() {
+//    func getBlockUser(indexPath: IndexPath) {
 //        //FIRDatabaseのReference
-//        let postsRef = Database.database().reference().child(Const2.PostPath)
+//        let postData = postArray[indexPath.row]
+//        let postRef = Database.database().reference().child(Const.PostPath)
+//        let posts = postRef.child(postData.id!)
+//        let reportBlock = blockUserIdArray[indexPath.row]
 //
-//        //includeKeyでBlockの子クラスである会員情報を持ってきている
-//        postsRef.child("blockId")
+//        //
+//        if posts.child(reportBlock.blockId!) == posts.child(postData.uid!){
 //
 //
-//        //resultかerrorに何か入ってきたら、
-//        postsRef.child("blockId")({ (result, error) in
-//            //errorがnilでなかったら（エラーがあったら）
-//            if error != nil {
-//                //エラーの処理
-//                print(error)
-//            //errorがnilだったら（エラーがなかったら）→result
-//            } else {
-//                //ブロックされたユーザーのIDが含まれる + removeall()は初期化していて、データの重複を防いでいる
-//                self.blockUserIdDic.removeAll()
-//                //resultから一つずつ取り出す（＝blockObject）
-//                for blockObject in result as! [NCMBObject] {
-//                    //この部分で①の配列（blockUserIdArray）にブロックユーザー情報が格納
-//                    //blockUserIdArrayに取り出したオブジェクト(キー値："blockUserID")を追加（append）する
-//                    self.blockUserIdArray.append(blockObject.object(forKey: "blockUserID") as! String)
 //
-//                }
+//        }
 //
-//            }
-//        })
-//        //再読み込み
-//        loadData()
 //    }
-//
-//    //③
+
+    //③
 //    func loadData(){
 //        //ここにNCMBから値を持ってくるコードが書いてある前提
 //        //appendする時に、ブロックユーザーがnilであったらappendされるようにしている。
@@ -195,6 +183,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // セルを取得してデータを設定する
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! PostTableViewCell
+        
         cell.setPostData(postArray[indexPath.row])
 
         // セル内のボタンのアクションをソースコードで設定する
@@ -210,9 +199,9 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     internal func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         
         let postData = postArray[indexPath.row]
-        let postRef = Database.database().reference()
-        let const1 = postRef.child(Const.PostPath)
-        let const2 = postRef.child(Const2.PostPath2)
+        let postRef = Database.database().reference().child(Const.PostPath)
+        let posts = postRef.child(postData.id!)
+
         
         //もし、投稿ユーザーIDが自分のIDじゃなかったら、
         if postData.uid != Auth.auth().currentUser?.uid{
@@ -232,7 +221,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                     //辞書
                     let blockUserIdDic = ["reportID": postDataId!,"reportUser": reportUserId!] as [String : Any]
                     //保存
-                    const2.child("report").childByAutoId().setValue(blockUserIdDic)
+                    posts.child("report").setValue(blockUserIdDic)
                     print("DEBUG_PRINT: 報告を保存しました。")
                     print(blockUserIdDic)
 
@@ -261,15 +250,33 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 let blockAction = UIAlertAction(title: "ブロックする", style: .destructive) { (action) in
                     SVProgressHUD.showSuccess(withStatus: "このユーザーをブロックしました。")
                     
-                    let blockId = postData.id
-                    let blockUserId = postData.uid
-                    //辞書
-                    let blockUserIdDic = ["blockId": blockId!,"blockUserId": blockUserId!] as [String : Any]
-                    //保存
-                    const2.child("block").childByAutoId().setValue(blockUserIdDic)
+                //配列にblockUserId（uid）を追加
+                self.blockUserIdArray.append(postData.uid!)
+                //firebaseに保存
+                posts.child("block").setValue(self.blockUserIdArray)
 
+                    print("【blockUserIdArray】\(self.blockUserIdArray)")
+                
+                //blockUserIdArrayから一つずつ取り出す
+                for blockUser in self.blockUserIdArray{
+                    //取り出したものとpostData.uidが同じだったら、
+                    if blockUser == postData.uid{
+                        //postArrayをフィルタリングしたもの
+                        let filteringArray = self.postArray.filter{$0.uid != postData.uid}
+                        print("【filteringArray】:\(filteringArray)")
 
-                     //ここで③を読み込んでいる
+                        self.postArray = filteringArray
+                        
+                        print(self.postArray)
+                    }
+                }
+            
+//                              
+//                let index: Int = 0
+//                // 差し替えるため一度削除する
+//                self.postArray.remove(at: index)
+                // TableViewを再表示する
+                self.tableView.reloadData()
 
                 }
                 //アラートアクションのキャンセルボタン
@@ -305,7 +312,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                                     //削除をする
                                     let deleteAction = UIAlertAction(title: "OK", style: .default) { (action) in
                                         //オブジェクトの削除
-                                        const1.child(postData.id!).removeValue()
+                                        posts.removeValue()
                                         print("削除しました")
                                         // 差し替えるため一度削除する
                                        var index: Int = 0

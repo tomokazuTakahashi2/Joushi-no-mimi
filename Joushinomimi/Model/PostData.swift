@@ -21,6 +21,7 @@ class PostData: NSObject {
     var date: Date?
     var likes: [String] = []
     var isLiked: Bool = false
+    var block: String?
 
     init(snapshot: DataSnapshot, myId: String) {
         self.id = snapshot.key
@@ -30,6 +31,8 @@ class PostData: NSObject {
         self.autoIdKey = valueDictionary["autoIdKey"]as? String
         
         self.uid = valueDictionary["uid"]as? String
+        
+        self.block = valueDictionary["block"]as? String
         
         self.name = valueDictionary["name"] as? String
 
@@ -54,4 +57,5 @@ class PostData: NSObject {
             }
         }
     }
+    
 }

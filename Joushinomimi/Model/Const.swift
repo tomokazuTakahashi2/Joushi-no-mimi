@@ -5,8 +5,4 @@ struct Const {
     
 }
 
-struct Const2 {
-    static let PostPath2 = "block"
-    
-}
 

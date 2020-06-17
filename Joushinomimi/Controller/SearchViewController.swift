@@ -69,7 +69,7 @@ class SearchViewController: UIViewController,UISearchBarDelegate, UITableViewDel
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
        
-        //もしカレントユーザーがnilだったら、
+        //もしカレントユーザーがnilじゃなかったら、（ログインしていたら）
         if Auth.auth().currentUser != nil {
 
             if self.observing == false {
@@ -117,6 +117,7 @@ class SearchViewController: UIViewController,UISearchBarDelegate, UITableViewDel
                 // trueとする
                 observing = true
             }
+        //ログインしていなかったら、
         } else {
             if observing == true {
                 // ログアウトを検出したら、一旦テーブルをクリアしてオブザーバーを削除する。
