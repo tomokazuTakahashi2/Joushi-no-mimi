@@ -22,6 +22,7 @@ class PostData: NSObject {
     var likes: [String] = []
     var isLiked: Bool = false
     var block: String?
+    
 
     init(snapshot: DataSnapshot, myId: String) {
         self.id = snapshot.key

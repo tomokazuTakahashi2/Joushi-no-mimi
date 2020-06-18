@@ -18,7 +18,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     //ブロックされたユーザーID
     var blockUserIdArray =  [String]()
     //ブロックされていないユーザー
-    var filteringArray =  [String]()
+    var filteringArray: [PostData] = []
     
     //引っ張って更新
     let refresh = UIRefreshControl()
@@ -92,7 +92,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 postsRef.observe(.childChanged, with: { snapshot in
                     print("DEBUG_PRINT: 要素が変更されました。")
                     
-                    //Auth.auth().currentUser?.uidがnilでなかったら、
+                    //Auth.auth().currentUser?.uidがnilでなかったら、(ログインしていたら)
                     if let uid = Auth.auth().currentUser?.uid {
                     // 💡PostDataクラスを生成して受け取ったデータを設定する
                         let postData = PostData(snapshot: snapshot, myId: uid)
@@ -108,6 +108,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                                 index = self.postArray.firstIndex(of: post)!
                                 break
                             }
+                            //削除したものを抜かして生成される
                         }
 
                         // 差し替えるため一度削除する
@@ -250,31 +251,32 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 let blockAction = UIAlertAction(title: "ブロックする", style: .destructive) { (action) in
                     SVProgressHUD.showSuccess(withStatus: "このユーザーをブロックしました。")
                     
-                //配列にblockUserId（uid）を追加
+                //blockUserIdArrayに対象投稿のuidを追加
                 self.blockUserIdArray.append(postData.uid!)
                 //firebaseに保存
                 posts.child("block").setValue(self.blockUserIdArray)
 
                     print("【blockUserIdArray】\(self.blockUserIdArray)")
-                
-                //blockUserIdArrayから一つずつ取り出す
-                for blockUser in self.blockUserIdArray{
-                    //取り出したものとpostData.uidが同じだったら、
-                    if blockUser == postData.uid{
-                        //postArrayをフィルタリングしたもの
-                        let filteringArray = self.postArray.filter{$0.uid != postData.uid}
-                        print("【filteringArray】:\(filteringArray)")
+                    
+                //postArrayをフィルタリング（postArray.uidとpostData.uidが異なるもの(=ブロックIDじゃないもの)を残す）したもの
+                    self.filteringArray = self.postArray.filter{$0.uid != postData.uid}
+                    print("【filteringArray】:\(self.filteringArray)")
 
-                        self.postArray = filteringArray
-                        
-                        print(self.postArray)
+                // 差し替えるため一度削除する
+                var index: Int = 0
+                //filteringArrayから一つずつ取り出す
+                for post in self.filteringArray {
+                    //取り出したID(post.id)とポストデータのID（postData.id）が同じとき、
+                    if post.id == postData.id {
+                        print(post.id!)
+                        //（一致したIDのうちの）最初のインデックスをindexとする
+                        index = self.postArray.firstIndex(of: post)!
+                        break
                     }
                 }
-            
-//                              
-//                let index: Int = 0
-//                // 差し替えるため一度削除する
-//                self.postArray.remove(at: index)
+                // 差し替えるため一度削除する
+                self.postArray.remove(at: index)
+
                 // TableViewを再表示する
                 self.tableView.reloadData()
 
@@ -311,7 +313,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                                     }
                                     //削除をする
                                     let deleteAction = UIAlertAction(title: "OK", style: .default) { (action) in
-                                        //オブジェクトの削除
+                                        //firebaseのオブジェクトの削除
                                         posts.removeValue()
                                         print("削除しました")
                                         // 差し替えるため一度削除する
@@ -325,7 +327,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                                                break
                                            }
                                        }
-                                        //postArrayを削除
+                                        //差し替えるため一度削除する
                                         self.postArray.remove(at: index)
                                         // TableViewを再表示する
                                         self.tableView.reloadData()
@@ -399,3 +401,10 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
 }
 
 
+extension Array where Element: Equatable {
+    mutating func remove(value: Element) {
+        if let i = self.index(of: value) {
+            self.remove(at: i)
+        }
+    }
+}
