@@ -62,8 +62,6 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
 //MARK: - viewWillAppear
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-
-        
         
         //FIRDatabaseのReference
         let postsRef = Database.database().reference().child(Const.PostPath)
@@ -147,7 +145,12 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                     observing = false
                 }
             }
+        // userDefaultsに保存された値の取得
+        guard let getMaxSpeed:[PostData] = UserDefaults.standard.array(forKey: "filteringArray") as? [PostData] else{return}
 
+        if getMaxSpeed != []{
+            self.postArray = getMaxSpeed
+        }
 
     }
     
@@ -230,24 +233,19 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                     
                 //blockUserIdArrayに対象投稿のuidを追加
                 self.blockUserIdArray.append(postData.uid!)
-//                //firebaseに保存
-//                posts.child("block").setValue(self.blockUserIdArray)
-
                     print("【blockUserIdArray】\(self.blockUserIdArray)")
                     
                 //postArrayをフィルタリング（postArray.uidとpostData.uidが異なるもの(=ブロックIDじゃないもの)を残す）したもの
-                    let filteringArray = self.postArray.filter{$0.uid != postData.uid}
+                let filteringArray = self.postArray.filter{$0.uid != postData.uid}
                     print("【filteringArray】:\(filteringArray)")
-
-//                for i in self.filteringArray{
-//                    print(i.id!)
-//                    }
                     
-                    //firebaseに保存
-                    posts.child("block").setValue(["filteringArray" : filteringArray])
+                let sendNsData: NSData = try! NSKeyedArchiver.archivedData(withRootObject: postData, requiringSecureCoding: true) as NSData
+                
+                //UserDefaultsに保存
+                UserDefaults.standard.set(sendNsData, forKey: "filteringArray")
 
                 //postArrayの中身をfilteringArrayの中身にすり替える
-                    self.postArray = filteringArray
+                self.postArray = filteringArray
 
                 // TableViewを再表示する
                 self.tableView.reloadData()
