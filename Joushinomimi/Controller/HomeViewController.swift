@@ -18,7 +18,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     //ブロックされたユーザーID
     var blockUserIdArray =  [String]()
     //ブロックされていないユーザー
-    var filteringArray: [PostData] = []
+    var filteringArray =  [String]()
     
     //引っ張って更新
     let refresh = UIRefreshControl()
@@ -236,18 +236,18 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                     print("【blockUserIdArray】\(self.blockUserIdArray)")
                     
                 //postArrayをフィルタリング（postArray.uidとpostData.uidが異なるもの(=ブロックIDじゃないもの)を残す）したもの
-                    self.filteringArray = self.postArray.filter{$0.uid != postData.uid}
-                    print("【filteringArray】:\(self.filteringArray)")
+                    let filteringArray = self.postArray.filter{$0.uid != postData.uid}
+                    print("【filteringArray】:\(filteringArray)")
 
 //                for i in self.filteringArray{
 //                    print(i.id!)
 //                    }
                     
-//                    //firebaseに保存
-//                    posts.child("block").setValue(self.filteringArray)
+                    //firebaseに保存
+                    posts.child("block").setValue(["filteringArray" : filteringArray])
 
                 //postArrayの中身をfilteringArrayの中身にすり替える
-                    self.postArray = self.filteringArray
+                    self.postArray = filteringArray
 
                 // TableViewを再表示する
                 self.tableView.reloadData()

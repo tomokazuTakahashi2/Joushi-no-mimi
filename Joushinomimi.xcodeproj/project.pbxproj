@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		640E504924A8258300E7C717 /* プライバシーポリシー.txt in Resources */ = {isa = PBXBuildFile; fileRef = 640E504824A8258200E7C717 /* プライバシーポリシー.txt */; };
 		643AA755247D4D9C009D6834 /* TermsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 643AA754247D4D9B009D6834 /* TermsViewController.swift */; };
 		643AA75924827593009D6834 /* ReportBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 643AA75824827593009D6834 /* ReportBlock.swift */; };
 		6448DFA623F70BB900E99BC1 /* Const.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6448DFA523F70BB900E99BC1 /* Const.swift */; };
@@ -36,6 +37,7 @@
 
 /* Begin PBXFileReference section */
 		1BFA94647A129AC71EE94309 /* Pods-Joushinomimi.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Joushinomimi.debug.xcconfig"; path = "Target Support Files/Pods-Joushinomimi/Pods-Joushinomimi.debug.xcconfig"; sourceTree = "<group>"; };
+		640E504824A8258200E7C717 /* プライバシーポリシー.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "プライバシーポリシー.txt"; path = "../../プライバシーポリシー.txt"; sourceTree = "<group>"; };
 		643AA754247D4D9B009D6834 /* TermsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsViewController.swift; sourceTree = "<group>"; };
 		643AA75824827593009D6834 /* ReportBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportBlock.swift; sourceTree = "<group>"; };
 		6448DFA523F70BB900E99BC1 /* Const.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Const.swift; sourceTree = "<group>"; };
@@ -159,6 +161,7 @@
 				6448DFA323F6FEDF00E99BC1 /* Controller */,
 				64E83A5923F6CD1B00A8D53F /* Info.plist */,
 				64E83A6923F6D27F00A8D53F /* GoogleService-Info.plist */,
+				640E504824A8258200E7C717 /* プライバシーポリシー.txt */,
 			);
 			path = Joushinomimi;
 			sourceTree = "<group>";
@@ -237,6 +240,7 @@
 				64E83A6A23F6D27F00A8D53F /* GoogleService-Info.plist in Resources */,
 				6448DFAE23F71B7300E99BC1 /* PostTableViewCell.xib in Resources */,
 				64E83A5823F6CD1B00A8D53F /* LaunchScreen.storyboard in Resources */,
+				640E504924A8258300E7C717 /* プライバシーポリシー.txt in Resources */,
 				64E83A5523F6CD1B00A8D53F /* Assets.xcassets in Resources */,
 				64C5D836242A5150004C10F7 /* NewsTableViewCell.xib in Resources */,
 				64E83A5323F6CD1A00A8D53F /* Main.storyboard in Resources */,
