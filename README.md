@@ -14,3 +14,5 @@
 ## イメージ
 ![画像](https://user-images.githubusercontent.com/52473279/85937225-8512ce80-b93c-11ea-9aca-fab571d4f681.png)
 
+## GIFイメージ
+![6 5動画](https://user-images.githubusercontent.com/52473279/85937298-374a9600-b93d-11ea-8bce-3d76ff0e935b.gif)
